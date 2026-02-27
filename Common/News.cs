@@ -8,10 +8,10 @@ namespace Common
 {
     public class News
     {
-        public string Img {  get; set; }
+        public string Img { get; set; }
         public DateTime Date { get; set; }
         public string Badge { get; set; }
-         public string Title { get; set; }
+        public string Title { get; set; }
         public News(string img, DateTime date, string badge, string title)
         {
             this.Img = img;

@@ -13,7 +13,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Common;
-
 using System.Net;
 using System.Net.Sockets;
 using Newtonsoft.Json;

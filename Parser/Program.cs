@@ -7,7 +7,6 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
 using System.Threading.Tasks;
 using System.Timers;
 using Common;
@@ -96,24 +95,33 @@ namespace Parser
         {
             try
             {
-                Trace.WriteLine(DateTime.Now.ToString("HH:mm:ss dd.MM.yyyy") + "парсинг полученного контента");
+                Trace.WriteLine(DateTime.Now.ToString("HH:mm:ss dd.MM.yyyy" + "контент получен"));
                 News.Clear();
                 var Html = new HtmlDocument();
+
                 Html.LoadHtml(content);
                 var Document = Html.DocumentNode;
+                HtmlNodeCollection ContentNews = Document.SelectNodes("//*[@class='container']");
+                HtmlNode Content7News = ContentNews[6];
+                HtmlNode ChildContent = Content7News.ChildNodes[1];
 
-                
-                HtmlNodeCollection ContentNews = Document.SelectNodes("//div[contains(@class,'news__item']");
-                foreach (var ContentNew in ContentNews) 
+                ContentNews = ChildContent.ChildNodes;
+
+                foreach (var ContentNew in ContentNews)
                 {
-                    string Img = ContentNew.SelectSingleNode("news__image").InnerText;
-                    string Date = ContentNew.SelectSingleNode("news__date").InnerText;
-                    string Badge = ContentNew.SelectSingleNode("badge bagde-success").InnerText;
-                    string Title = ContentNew.SelectSingleNode("news__title").InnerText;
+                    if (String.IsNullOrEmpty(ContentNew.InnerText.Trim())) continue;
+
+                    string Img = ContentNew.SelectSingleNode("//*[@class='news__image']").InnerText;
+                    string Date = ContentNew.SelectSingleNode(".//*[@class='news__date']").InnerText;
+
+                    HtmlNode Test = ContentNew.SelectSingleNode(".//*[@class='badge bagde-success']");
+                    string Badge = Test != null ? Test.InnerText : "";
+
+                    string Title = ContentNew.SelectSingleNode(".//*[@class='news__title']").InnerText;
                     string Src = ContentNew.GetAttributeValue("href", "");
                     DateTime DateNew = DateTime.Parse(Date);
                     if (DateNew.Month != Month) continue;
-                    News.Add(new Common.News(Img, DateNew, Badge, Title));
+                    News.Add(new Common.News(Img, DateNew, Badge, Title, Src));
                 }
             }
             catch (Exception ex)

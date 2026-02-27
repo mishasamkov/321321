@@ -6,8 +6,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Text;
-using System.Threading;
+
 using System.Threading.Tasks;
+using System.Timers;
 using Common;
 using HtmlAgilityPack;
 
@@ -68,6 +69,10 @@ namespace Parser
                 return null;
             }
         }
+        public static void StartServer()
+        {
+
+        }
         public static void ParseContent (string content)
         {
             try
@@ -77,7 +82,7 @@ namespace Parser
                 var Html = new HtmlDocument();
                 Html.LoadHtml(content);
                 var Document = Html.DocumentNode;
-                HtmlNodeCollection ContentNews = Document.SelectNodes('//div[contains"@class = ]');
+                //HtmlNodeCollection ContentNews = Document.SelectNodes("//div[contains"@class = ]");
                 foreach (var ContentNew in ContentNews) 
                 {
                     string Img = ContentNew.SelectSingleNode("").InnerText;

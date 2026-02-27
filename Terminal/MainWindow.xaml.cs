@@ -16,6 +16,7 @@ using Common;
 
 using System.Net;
 using System.Net.Sockets;
+using Newtonsoft.Json;
 
 namespace Terminal
 {
@@ -34,10 +35,29 @@ namespace Terminal
         {
             IPEndPoint EndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 5000);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            if (socket.Connected)
+            {
+                Command command = new Command() { Message = "start" };
+                string JsonCommand = JsonConvert.SerializeObject(command);
+                byte[] buffer = Encoding.UTF8.GetBytes(JsonCommand);
+                socket.Send(buffer);
+                buffer = new byte[10485760];
+                int ByteLenght = socket.Receive(buffer);
+                string Response = Encoding.UTF8.GetString(buffer,0, ByteLenght);
+                News = JsonConvert.DeserializeObject<List<News>>(Response);
+                LoadNews();
+            }
+            socket.Close();
         }
-        private void Get(object sender, RoutedEventArgs e)
+        public void LoadNews()
         {
-
+            ParentNews.Items.Clear();
+            foreach (var New in News)
+            {
+                ParentNews.Items.Add(New);
+            }
         }
+        private void Get(object sender, RoutedEventArgs e) => GetContent();
+
     }
 }

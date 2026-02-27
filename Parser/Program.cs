@@ -101,6 +101,7 @@ namespace Parser
                 var Html = new HtmlDocument();
                 Html.LoadHtml(content);
                 var Document = Html.DocumentNode;
+
                 
                 HtmlNodeCollection ContentNews = Document.SelectNodes("//div[contains(@class,'news__item']");
                 foreach (var ContentNew in ContentNews) 

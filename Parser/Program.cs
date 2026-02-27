@@ -5,12 +5,14 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 
 using System.Threading.Tasks;
 using System.Timers;
 using Common;
 using HtmlAgilityPack;
+using Newtonsoft.Json;
 
 namespace Parser
 {
@@ -71,7 +73,24 @@ namespace Parser
         }
         public static void StartServer()
         {
-
+            IPEndPoint EndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 5000);
+            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            socket.Bind(EndPoint);
+            socket.Listen(10);
+            while (true)
+            {        
+              Socket Handler = socket.Accept();
+              byte[] buffer = new byte[10485760];
+              int ByteLenght = Handler.Receive(buffer);
+              string Message = Encoding.UTF8.GetString(buffer, 0, ByteLenght);
+              Command command  = JsonConvert.DeserializeObject<Command>(Message);
+              if (command.Message == "start")
+              {
+                    string Response = JsonConvert.SerializeObject(News);
+                    buffer = Encoding.UTF8.GetBytes(Response);
+                    Handler.Send(buffer);
+              }
+            }
         }
         public static void ParseContent (string content)
         {
@@ -82,13 +101,15 @@ namespace Parser
                 var Html = new HtmlDocument();
                 Html.LoadHtml(content);
                 var Document = Html.DocumentNode;
-                //HtmlNodeCollection ContentNews = Document.SelectNodes("//div[contains"@class = ]");
+                
+                HtmlNodeCollection ContentNews = Document.SelectNodes("//div[contains(@class,'news__item']");
                 foreach (var ContentNew in ContentNews) 
                 {
-                    string Img = ContentNew.SelectSingleNode("").InnerText;
-                    string Date = ContentNew.SelectSingleNode("").InnerText;
-                    string Badge = ContentNew.SelectSingleNode("").InnerText;
-                    string Title = ContentNew.SelectSingleNode("").InnerText;
+                    string Img = ContentNew.SelectSingleNode("news__image").InnerText;
+                    string Date = ContentNew.SelectSingleNode("news__date").InnerText;
+                    string Badge = ContentNew.SelectSingleNode("badge bagde-success").InnerText;
+                    string Title = ContentNew.SelectSingleNode("news__title").InnerText;
+                    string Src = ContentNew.GetAttributeValue("href", "");
                     DateTime DateNew = DateTime.Parse(Date);
                     if (DateNew.Month != Month) continue;
                     News.Add(new Common.News(Img, DateNew, Badge, Title));
